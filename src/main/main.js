@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, ipcMain, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain, Menu, dialog } = require("electron");
 const path = require("path");
 
 const createWindow = () => {
@@ -13,6 +13,22 @@ const createWindow = () => {
 			preload: path.join(__dirname, "../preload/preload.js")
 		}
 	});
+
+	const menu = Menu.buildFromTemplate([
+		{
+			label: app.name,
+			submenu: [
+				{
+					click: () => mainWindow.webContents.send("mUpdateCounter", 1),
+					label: "Increment"
+				},
+				{
+					click: () => mainWindow.webContents.send("mUpdateCounter", -1),
+					label: "Decrement"
+				}
+			]
+		}
+	]);
 
 	ipcMain.handle("mPing", () => "pong");
 	ipcMain.handle("mDialogOpenFile", () => {
@@ -34,8 +50,12 @@ const createWindow = () => {
 		const win = BrowserWindow.fromWebContents(webContents);
 		win.setTitle(title);
 	});
+	ipcMain.on("mCounterValue", (_event, value) => {
+		console.log(value); // will print value to Node console
+	});
 
 	// and load the index.html of the app.
+	Menu.setApplicationMenu(menu);
 	mainWindow.loadFile(path.join(__dirname, "../renderer/index.html"));
 
 	// Open the DevTools.

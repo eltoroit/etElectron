@@ -48,17 +48,33 @@
 
 -   Processes communicate by passing messages through developer-defined "channels" with the **ipcMain** and **ipcRenderer** modules
 -   **Pattern 1: Renderer to main (one-way)**
+
     -   _Renderer_ => _Preload_ => _Main_
-        -   _Renderer_: `window.electronAPI.rRetTitle("title")`
-        -   _Preload_: `contextBridge.exposeInMainWorld('electronAPI', { rSetTitle: (title) => ipcRenderer.send('mSetTitle', title) })`
-        -   _Main_: `ipcMain.on('mSetTitle', (event, title) => { ... }`
+
+    | Process    | Code                                                                                                             |
+    | ---------- | ---------------------------------------------------------------------------------------------------------------- |
+    | _Renderer_ | `window.electronAPI.rRetTitle("title")`                                                                          |
+    | _Preload_  | `contextBridge.exposeInMainWorld('electronAPI', { rSetTitle: (title) => ipcRenderer.send('mSetTitle', title) })` |
+    | _Main_     | `ipcMain.on('mSetTitle', (event, title) => { ... }`                                                              |
+
 -   **Pattern 2: Renderer to main (two-way)**
+
     -   _Renderer_ => _Preload_ => _Main_ => _Preload_ => _Renderer_
-        -   _Renderer_: `await window.electronAPI.rOpenFile()...`
-        -   _Preload_: `rOpenFile: () => ipcRenderer.invoke('mOpenFile')`
-        -   _Main_: `ipcMain.handle('mOpenFile', () => {...})`
-        -   _Renderer_: `...then(data => {...})`
 
-# XXX
+    | Process    | Code                                               |
+    | ---------- | -------------------------------------------------- |
+    | _Renderer_ | `await window.electronAPI.rOpenFile()...`          |
+    | _Preload_  | `rOpenFile: () => ipcRenderer.invoke('mOpenFile')` |
+    | _Main_     | `ipcMain.handle('mOpenFile', () => {...})`         |
+    | _Renderer_ | `...then(data => {...})`                           |
 
-    -   [Main] <==> [Preload] <==> [Renderer]
+-   **Pattern 3: Main to renderer**
+
+    -   _Main_ => _Preload_ => _Renderer_ => _Preload_ => _Main_
+
+    | Process    | Code                                                                                                               |
+    | ---------- | ------------------------------------------------------------------------------------------------------------------ |
+    | _Main_     | `mainWindow.webContents.send("mUpdateCounter", 1)`                                                                 |
+    | _Preload_  | `rRegisterCounterHandler: (callback) => ipcRenderer.on("mUpdateCounter", callback)`                                |
+    | _Renderer_ | `window.electronAPI.rRegisterCounterHandler((event, value) => { event.sender.send("mCounterValue", newValue); });` |
+    | _Main_     | `ipcMain.on("mCounterValue", (_event, value) => { ... });`                                                         |

@@ -10,5 +10,6 @@ contextBridge.exposeInMainWorld("versions", {
 contextBridge.exposeInMainWorld("electronAPI", {
 	rPing: () => ipcRenderer.invoke("mPing"),
 	rSetTitle: (title) => ipcRenderer.send("mSetTitle", title),
-	rDialogOpenFile: () => ipcRenderer.invoke("mDialogOpenFile")
+	rDialogOpenFile: () => ipcRenderer.invoke("mDialogOpenFile"),
+	rRegisterCounterHandler: (callback) => ipcRenderer.on("mUpdateCounter", callback)
 });

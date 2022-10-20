@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 
 const createWindow = () => {
@@ -11,6 +11,8 @@ const createWindow = () => {
 			preload: path.join(__dirname, "../preload.js")
 		}
 	});
+
+	ipcMain.handle("ping", () => "pong");
 
 	// and load the index.html of the app.
 	mainWindow.loadFile(path.join(__dirname, "../renderer/index.html"));

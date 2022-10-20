@@ -29,6 +29,7 @@
         -   No access to Node.js
 -   Preload Scripts
     -   Like Chrome extensions
-    -   _Execute in a renderer_ (before web content begins loading)
-    -   They are granted more privileges by having access to Node.js APIs.
     -   Share a global **window** with the renderers.
+    -   Runs in a context that has access to both the HTML DOM and a limited subset of Node.js and Electron APIs.
+        -   They are granted more privileges by having access to Node.js APIs.
+        -   _Execute in a renderer_ (before web content begins loading)

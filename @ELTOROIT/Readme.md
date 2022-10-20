@@ -78,3 +78,9 @@
     | _Preload_  | `rRegisterCounterHandler: (callback) => ipcRenderer.on("mUpdateCounter", callback)`                                |
     | _Renderer_ | `window.electronAPI.rRegisterCounterHandler((event, value) => { event.sender.send("mCounterValue", newValue); });` |
     | _Main_     | `ipcMain.on("mCounterValue", (_event, value) => { ... });`                                                         |
+
+-   **Pattern 4: Renderer to renderer**
+    -   Two options
+        -   Use the main process as a message broker between renderers
+        -   Pass a **MessagePort** from the main process to both renderers, allows direct communication between renderers.
+            -   https://www.electronjs.org/docs/latest/tutorial/message-ports

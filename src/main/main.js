@@ -1,8 +1,10 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, ipcMain, Menu, dialog } = require("electron");
 const path = require("path");
+const { app, BrowserWindow, ipcMain, Menu, dialog, Tray, nativeImage } = require("electron");
 
 class MainProcess {
+	quitCounter = 3;
+
 	createBrowserWindow(homepage, isDevToolsVisible) {
 		const window = new BrowserWindow({
 			// width: 800,
@@ -47,6 +49,31 @@ class MainProcess {
 		);
 	}
 
+	createTray(window) {
+		const icon = nativeImage.createFromPath(path.join(__dirname, "../../resources/icon.png"));
+		const tray = new Tray(icon);
+
+		tray.setContextMenu(
+			Menu.buildFromTemplate([
+				{
+					label: "Increment",
+					click: () => window.webContents.send("mUpdateCounter", 1)
+				},
+				{
+					label: "Decrement",
+					click: () => window.webContents.send("mUpdateCounter", -1)
+				},
+				{
+					label: "Quit",
+					click: () => app.quit()
+				}
+			])
+		);
+		tray.setToolTip("This is my application");
+		// tray.setTitle("This is my title"); // MACOSX Shows this to the right of the icon
+		return tray;
+	}
+
 	registerEvents() {
 		ipcMain.handle("mPing", async () => {
 			return "pong";
@@ -84,6 +111,7 @@ class MainProcess {
 		app.whenReady().then(() => {
 			window = this.createBrowserWindow(homepage, isDevToolsVisible);
 			this.createMenu(window);
+			this.createTray(window);
 			app.on("activate", () => {
 				// On macOS it's common to re-create a window in the app when the dock icon is clicked and there are no other windows open.
 				if (BrowserWindow.getAllWindows().length === 0) {
@@ -99,8 +127,10 @@ class MainProcess {
 		});
 
 		app.on("before-quit", (event) => {
-			console.log("Can't quit! (Use frute force! :-)");
-			event.preventDefault();
+			if (--this.quitCounter > 0) {
+				console.log(`Can't quit! (Try again... ${this.quitCounter})`);
+				event.preventDefault();
+			}
 		});
 
 		this.registerEvents();

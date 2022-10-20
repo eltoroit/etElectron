@@ -2,7 +2,7 @@ export default class MyCode {
 	constructor() {
 		setTimeout(() => {
 			window.electronAPI.rPing().then((response) => {
-				alert(response);
+				console.log(response);
 			});
 		}, 100);
 

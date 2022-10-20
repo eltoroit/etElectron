@@ -12,7 +12,7 @@ const createWindow = () => {
 		}
 	});
 
-	ipcMain.handle("ping", () => "pong");
+	ipcMain.handle("mainPing", () => "pong");
 
 	// and load the index.html of the app.
 	mainWindow.loadFile(path.join(__dirname, "../renderer/index.html"));

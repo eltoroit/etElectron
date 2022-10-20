@@ -4,7 +4,7 @@ information.innerHTML = `This app is using Chromium (v${versions.chrome}),<br/>
                          and Electron (v${versions.electron})`;
 
 setTimeout(() => {
-	window.ipc.ping().then((response) => {
+	window.electron.rendererPing().then((response) => {
 		alert(response);
 	});
-}, 1000);
+}, 100);

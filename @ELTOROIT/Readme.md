@@ -4,10 +4,13 @@
     -   https://www.electronjs.org/docs/latest/tutorial/quick-start
 -   Tutorial
     -   https://www.electronjs.org/docs/latest/tutorial/tutorial-first-app
+-   Process Model
+    -   https://www.electronjs.org/docs/latest/tutorial/process-model
+-   Inter-Process Communication
+    -   https://www.electronjs.org/docs/latest/tutorial/ipc
 
 # Process Model
 
--   https://www.electronjs.org/docs/latest/tutorial/process-model
 -   Two processes
     -   main
     -   renderer
@@ -25,7 +28,7 @@
             -   Menus, dialogs, and tray icons
 -   Renderer Process
     -   Separate renderer process for each open **BrowserWindow**
-    -   Code should behave according to web standards (HTML, CSS, JavaScript (<script />))
+    -   Code should behave according to web standards (HTML, CSS, JavaScript)
         -   No access to Node.js
 -   Preload Scripts
     -   Like Chrome extensions
@@ -33,3 +36,29 @@
     -   Runs in a context that has access to both the HTML DOM and a limited subset of Node.js and Electron APIs.
         -   They are granted more privileges by having access to Node.js APIs.
         -   _Execute in a renderer_ (before web content begins loading)
+-   Just know and think they are different
+    -   Code the Renderer web app like you would code without Electron
+        -   Except that you can assume your app will be running in Chrome, no need to build for multiple browsers
+        -   Befine your own API contract, think of calling Electron as making web services calls (different syntax, but same idea)
+    -   Code the Main process like if you were building a web server
+        -   Just respond to calls as if they were web service calls (different syntax, but same idea)
+    -   Keep your app decoupled, and therefore, more secure.
+
+# Inter-Process Communication
+
+-   Processes communicate by passing messages through developer-defined "channels" with the **ipcMain** and **ipcRenderer** modules
+-   **Pattern 1: Renderer to main (one-way)**
+    -   _Renderer_ => _Preload_ => _Main_
+        -   _Renderer_: `window.electronAPI.rRetTitle("title")`
+        -   _Preload_: `contextBridge.exposeInMainWorld('electronAPI', { rSetTitle: (title) => ipcRenderer.send('mSetTitle', title) })`
+        -   _Main_: `ipcMain.on('mSetTitle', (event, title) => { ... }`
+-   **Pattern 2: Renderer to main (two-way)**
+    -   _Renderer_ => _Preload_ => _Main_ => _Preload_ => _Renderer_
+        -   _Renderer_: `await window.electronAPI.rOpenFile()...`
+        -   _Preload_: `rOpenFile: () => ipcRenderer.invoke('mOpenFile')`
+        -   _Main_: `ipcMain.handle('mOpenFile', () => {...})`
+        -   _Renderer_: `...then(data => {...})`
+
+# XXX
+
+    -   [Main] <==> [Preload] <==> [Renderer]

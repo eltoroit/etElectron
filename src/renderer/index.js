@@ -4,7 +4,24 @@ information.innerHTML = `This app is using Chromium (v${versions.chrome}),<br/>
                          and Electron (v${versions.electron})`;
 
 setTimeout(() => {
-	window.electron.rendererPing().then((response) => {
+	window.electronAPI.rPing().then((response) => {
 		alert(response);
 	});
 }, 100);
+
+// Title
+const setButton = document.getElementById("btnTitle");
+const titleInput = document.getElementById("title");
+setButton.addEventListener("click", () => {
+	const title = titleInput.value;
+	window.electronAPI.rSetTitle(title);
+});
+
+// Open Folder
+const btn = document.getElementById("btnFile");
+const filePathElement = document.getElementById("filePath");
+
+btn.addEventListener("click", async () => {
+	const filePath = await window.electronAPI.rDialogOpenFile();
+	filePathElement.innerText = filePath;
+});

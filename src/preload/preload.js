@@ -7,6 +7,8 @@ contextBridge.exposeInMainWorld("versions", {
 	electron: process.versions.electron
 });
 
-contextBridge.exposeInMainWorld("electron", {
-	rendererPing: () => ipcRenderer.invoke("mainPing")
+contextBridge.exposeInMainWorld("electronAPI", {
+	rPing: () => ipcRenderer.invoke("mPing"),
+	rSetTitle: (title) => ipcRenderer.send("mSetTitle", title),
+	rDialogOpenFile: () => ipcRenderer.invoke("mDialogOpenFile")
 });

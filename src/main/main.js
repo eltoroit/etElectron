@@ -98,6 +98,11 @@ class MainProcess {
 			if (process.platform !== "darwin") app.quit();
 		});
 
+		app.on("before-quit", (event) => {
+			console.log("Can't quit! (Use frute force! :-)");
+			event.preventDefault();
+		});
+
 		this.registerEvents();
 	}
 }

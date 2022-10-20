@@ -29,12 +29,17 @@ class MainProcess {
 					label: app.name,
 					submenu: [
 						{
-							click: () => window.webContents.send("mUpdateCounter", 1),
-							label: "Increment"
+							label: "Increment",
+							click: () => window.webContents.send("mUpdateCounter", 1)
 						},
 						{
-							click: () => window.webContents.send("mUpdateCounter", -1),
-							label: "Decrement"
+							label: "Decrement",
+							click: () => window.webContents.send("mUpdateCounter", -1)
+						},
+						{
+							label: "Quit",
+							accelerator: process.platform === "darwin" ? "Cmd+Q" : "Alt+F4",
+							click: () => app.quit()
 						}
 					]
 				}

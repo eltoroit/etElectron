@@ -16,6 +16,7 @@ class MainProcess {
 			}
 		});
 		window.loadFile(homepage);
+		// window.loadURL(homepage);
 
 		if (isDevToolsVisible) {
 			window.webContents.openDevTools();
@@ -105,7 +106,8 @@ class MainProcess {
 	start() {
 		let window;
 		const isDevToolsVisible = true;
-		const homepage = path.join(__dirname, "../renderer/index.html");
+		// const homepage = path.join(__dirname, "../renderer/index.html");
+		const homepage = `/Users/aperez/GitProjects/current/LWC-OFF/03-LWC+Electron/dist/index.html`;
 
 		// This method will be called when Electron has finished initialization and is ready to create browser windows. Some APIs can only be used after this event occurs.
 		app.whenReady().then(() => {

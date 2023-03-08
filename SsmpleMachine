@@ -1,0 +1,49 @@
+{
+  "dttm": "2023-03-08T21:16:47.132Z",
+  "networks": [
+    {
+      "interfaceName": "Wi-Fi 3",
+      "value": [
+        {
+          "address": "fe80::ddfe:9b27:cbde:8368",
+          "netmask": "ffff:ffff:ffff:ffff::",
+          "family": "IPv6",
+          "mac": "1c:bf:c0:76:74:47",
+          "internal": false,
+          "cidr": "fe80::ddfe:9b27:cbde:8368/64",
+          "scopeid": 17
+        },
+        {
+          "address": "10.123.134.42",
+          "netmask": "255.255.0.0",
+          "family": "IPv4",
+          "mac": "1c:bf:c0:76:74:47",
+          "internal": false,
+          "cidr": "10.123.134.42/16"
+        }
+      ]
+    },
+    {
+      "interfaceName": "Loopback Pseudo-Interface 1",
+      "value": [
+        {
+          "address": "::1",
+          "netmask": "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff",
+          "family": "IPv6",
+          "mac": "00:00:00:00:00:00",
+          "internal": true,
+          "cidr": "::1/128",
+          "scopeid": 0
+        },
+        {
+          "address": "127.0.0.1",
+          "netmask": "255.0.0.0",
+          "family": "IPv4",
+          "mac": "00:00:00:00:00:00",
+          "internal": true,
+          "cidr": "127.0.0.1/8"
+        }
+      ]
+    }
+  ]
+}

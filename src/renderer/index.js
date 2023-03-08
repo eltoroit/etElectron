@@ -10,6 +10,7 @@ export default class MyCode {
 		this.setTitle();
 		this.openFile();
 		this.counter();
+		this.identify();
 	}
 
 	printVersions() {
@@ -44,6 +45,15 @@ export default class MyCode {
 			const newValue = oldValue + value;
 			counter.innerText = newValue;
 			event.sender.send("mCounterValue", newValue);
+		});
+	}
+
+	identify() {
+		const identify = document.getElementById("Identify");
+		window.electronAPI.rRegisterIdentityHandler((event, value) => {
+			console.log(value);
+			identify.textContent = value;
+			event.sender.send("evB2E_Identify", value);
 		});
 	}
 }

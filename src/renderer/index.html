@@ -4,6 +4,7 @@
 		<meta charset="UTF-8" />
 		<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self' 'unsafe-inline'" />
 		<title>HTML Title</title>
+		<link rel="stylesheet" type="text/css" href="./index.css" />
 	</head>
 	<body>
 		<h1>Hello World!</h1>
@@ -16,6 +17,10 @@
 		File path: <strong id="filePath"></strong>
 		<hr />
 		Current value: <strong id="counter">0</strong>
+		<hr />
+		Identify: <textarea id="Identify" class="identify" readonly disabled></textarea>
+		<hr />
+		Must quit three times :-)
 		<script type="module">
 			import MyCode from "./index.js";
 			let myCode = new MyCode();

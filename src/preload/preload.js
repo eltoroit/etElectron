@@ -10,5 +10,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
 	rPing: () => ipcRenderer.invoke("mPing"),
 	rSetTitle: (title) => ipcRenderer.send("mSetTitle", title),
 	rDialogOpenFile: () => ipcRenderer.invoke("mDialogOpenFile"),
+	rRegisterIdentityHandler: (callback) => ipcRenderer.on("evE2B_identify", callback),
 	rRegisterCounterHandler: (callback) => ipcRenderer.on("mUpdateCounter", callback)
 });

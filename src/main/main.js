@@ -40,6 +40,10 @@ class MainProcess {
 							click: () => window.webContents.send("mUpdateCounter", -1)
 						},
 						{
+							label: "Menu: Identify",
+							click: () => this._identifyComputer(window)
+						},
+						{
 							label: "Quit",
 							accelerator: process.platform === "darwin" ? "Cmd+Q" : "Alt+F4",
 							click: () => app.quit()
@@ -63,6 +67,10 @@ class MainProcess {
 				{
 					label: "Decrement",
 					click: () => window.webContents.send("mUpdateCounter", -1)
+				},
+				{
+					label: "Tray: Identify",
+					click: () => this._identifyComputer(window)
 				},
 				{
 					label: "Quit",
@@ -101,13 +109,16 @@ class MainProcess {
 		ipcMain.on("mCounterValue", (_event, value) => {
 			console.log(value); // will print value to Node console
 		});
+		ipcMain.on("evB2E_Identify", (_event, value) => {
+			console.log(value); // will print value to Node console
+		});
 	}
 
 	start() {
 		let window;
 		const isDevToolsVisible = true;
-		// const homepage = path.join(__dirname, "../renderer/index.html");
-		const homepage = `/Users/aperez/GitProjects/current/LWC-OFF/03-LWC+Electron/dist/index.html`;
+		const homepage = path.join(__dirname, "../renderer/index.html");
+		// const homepage = `/Users/aperez/GitProjects/current/LWC-OFF/03-LWC+Electron/dist/index.html`;
 
 		// This method will be called when Electron has finished initialization and is ready to create browser windows. Some APIs can only be used after this event occurs.
 		app.whenReady().then(() => {
@@ -136,6 +147,27 @@ class MainProcess {
 		});
 
 		this.registerEvents();
+	}
+
+	_identifyComputer(window) {
+		const os = require("os");
+		const interfaces = os.networkInterfaces();
+
+		let data = {
+			dttm: new Date().toJSON(),
+			networks: []
+		};
+
+		for (const interfaceName in interfaces) {
+			data.networks.push({
+				interfaceName,
+				value: interfaces[interfaceName]
+			});
+		}
+
+		data = JSON.stringify(data, null, 2);
+		console.log(data);
+		window.webContents.send("evE2B_identify", data);
 	}
 }
 const mp = new MainProcess();

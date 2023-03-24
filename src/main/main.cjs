@@ -3,7 +3,7 @@ const path = require("path");
 const { app, BrowserWindow, ipcMain, Menu, dialog, Tray, nativeImage } = require("electron");
 
 class MainProcess {
-	quitCounter = 3;
+	quitCounter = -1; // Old value was 3 preventing the app from closing, until really desired to do so :-)
 
 	createBrowserWindow(homepage, isDevToolsVisible) {
 		const window = new BrowserWindow({
@@ -12,15 +12,18 @@ class MainProcess {
 			width: 1920,
 			height: 1080,
 			webPreferences: {
-				preload: path.join(__dirname, "../preload/preload.js")
+				preload: path.join(__dirname, "../preload/preload.cjs")
 			}
 		});
-		window.loadFile(homepage);
-		// window.loadURL(homepage);
 
 		if (isDevToolsVisible) {
 			window.webContents.openDevTools();
 		}
+
+		setTimeout(() => {
+			window.loadFile(homepage);
+			// window.loadURL(homepage);
+		}, 5e3);
 
 		return window;
 	}
@@ -33,15 +36,17 @@ class MainProcess {
 					submenu: [
 						{
 							label: "Increment",
-							click: () => window.webContents.send("mUpdateCounter", 1)
+							click: () => {
+								window.webContents.send("M2R_UpdateCounter", 1);
+							}
 						},
 						{
 							label: "Decrement",
-							click: () => window.webContents.send("mUpdateCounter", -1)
+							click: () => window.webContents.send("M2R_UpdateCounter", -1)
 						},
 						{
-							label: "Menu: Identify",
-							click: () => this._identifyComputer(window)
+							label: "Menu: Computer Id",
+							click: () => window.webContents.send("M2R_Identity", this.#getComputerId(window))
 						},
 						{
 							label: "Quit",
@@ -62,15 +67,15 @@ class MainProcess {
 			Menu.buildFromTemplate([
 				{
 					label: "Increment",
-					click: () => window.webContents.send("mUpdateCounter", 1)
+					click: () => window.webContents.send("M2R_UpdateCounter", 1)
 				},
 				{
 					label: "Decrement",
-					click: () => window.webContents.send("mUpdateCounter", -1)
+					click: () => window.webContents.send("M2R_UpdateCounter", -1)
 				},
 				{
-					label: "Tray: Identify",
-					click: () => this._identifyComputer(window)
+					label: "Tray: Computer Id",
+					click: () => window.webContents.send("M2R_Identity", this.#getComputerId(window))
 				},
 				{
 					label: "Quit",
@@ -84,32 +89,23 @@ class MainProcess {
 	}
 
 	registerEvents() {
-		ipcMain.handle("mPing", async () => {
-			return "pong";
+		ipcMain.handle("R2M2R_Ping", async () => {
+			console.log("Ping");
+			return "pong"; // Promise resolves
 		});
-		ipcMain.handle("mDialogOpenFile", () => {
-			return new Promise((resolve, reject) => {
-				dialog
-					.showOpenDialog()
-					.then(({ canceled, filePaths }) => {
-						if (canceled) {
-							resolve;
-						} else {
-							resolve(filePaths[0]);
-						}
-					})
-					.catch((err) => reject(err));
-			});
+		ipcMain.handle("R2M2R_DialogOpenFile", async () => {
+			let { canceled, filePaths } = await dialog.showOpenDialog();
+			return canceled ? null : filePaths[0];
 		});
-		ipcMain.on("mSetTitle", (event, title) => {
+		ipcMain.on("R2M_SetTitle", (event, title) => {
 			const webContents = event.sender;
 			const win = BrowserWindow.fromWebContents(webContents);
 			win.setTitle(title);
 		});
-		ipcMain.on("mCounterValue", (_event, value) => {
+		ipcMain.on("R2M_CounterValue", (event, value) => {
 			console.log(value); // will print value to Node console
 		});
-		ipcMain.on("evB2E_Identify", (_event, value) => {
+		ipcMain.on("R2M_Identity", (event, value) => {
 			console.log(value); // will print value to Node console
 		});
 	}
@@ -134,8 +130,8 @@ class MainProcess {
 			});
 		});
 
-		// Quit when all windows are closed, except on macOS. There, it's common for applications and their menu bar to stay active until the user quits explicitly with Cmd + Q.
 		app.on("window-all-closed", () => {
+			// Quit when all windows are closed, except on macOS. There, it's common for applications and their menu bar to stay active until the user quits explicitly with Cmd + Q.
 			if (process.platform !== "darwin") app.quit();
 		});
 
@@ -149,7 +145,7 @@ class MainProcess {
 		this.registerEvents();
 	}
 
-	_identifyComputer(window) {
+	#getComputerId() {
 		const os = require("os");
 		const interfaces = os.networkInterfaces();
 
@@ -166,8 +162,8 @@ class MainProcess {
 		}
 
 		data = JSON.stringify(data, null, 2);
-		console.log(data);
-		window.webContents.send("evE2B_identify", data);
+		// console.log(data);
+		return data;
 	}
 }
 const mp = new MainProcess();

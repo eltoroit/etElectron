@@ -39,7 +39,7 @@
 -   Just know and think they are different
     -   Code the Renderer web app like you would code without Electron
         -   Except that you can assume your app will be running in Chrome, no need to build for multiple browsers
-        -   Befine your own API contract, think of calling Electron as making web services calls (different syntax, but same idea)
+        -   Define your own API contract, think of calling Electron as making web services calls (different syntax, but same idea)
     -   Code the Main process like if you were building a web server
         -   Just respond to calls as if they were web service calls (different syntax, but same idea)
     -   Keep your app decoupled, and therefore, more secure.
@@ -47,40 +47,53 @@
 # Inter-Process Communication
 
 -   Processes communicate by passing messages through developer-defined "channels" with the **ipcMain** and **ipcRenderer** modules
--   **Pattern 1: Renderer to main (one-way)**
 
-    -   _Renderer_ => _Preload_ => _Main_
+## Pattern 1: `R2M`: Renderer to main [one-way]
 
-    | Process    | Code                                                                                                             |
-    | ---------- | ---------------------------------------------------------------------------------------------------------------- |
-    | _Renderer_ | `window.electronAPI.rRetTitle("title")`                                                                          |
-    | _Preload_  | `contextBridge.exposeInMainWorld('electronAPI', { rSetTitle: (title) => ipcRenderer.send('mSetTitle', title) })` |
-    | _Main_     | `ipcMain.on('mSetTitle', (event, title) => { ... }`                                                              |
+-   `Renderer => Preload => Main`
+-   Notify MAIN that user performed action on the RENDERER
+-   Setup
+    -   MAIN must register the handler `ipcMain.on("R2M_SetTitle", ...)`
 
--   **Pattern 2: Renderer to main (two-way)**
+| Action | Process  | Concepts                                            | Sample                                                             |
+| ------ | -------- | --------------------------------------------------- | ------------------------------------------------------------------ |
+| 1      | Renderer | `Call` function on preload                          | `window.electronAPI.R2M_SetTitle("title")`                         |
+| 2      | Preload  | Defines function that calls `send()` on ipcRenderer | `R2M_SetTitle: (title) => ipcRenderer.send("R2M_SetTitle", title)` |
+| 3      | Main     | Register event handler using `on`                   | `ipcMain.on("R2M_SetTitle", (event, title) => { ... }`             |
 
-    -   _Renderer_ => _Preload_ => _Main_ => _Preload_ => _Renderer_
+## Pattern 2: `R2M2R`: Renderer to main [two-way]
 
-    | Process    | Code                                               |
-    | ---------- | -------------------------------------------------- |
-    | _Renderer_ | `await window.electronAPI.rOpenFile()...`          |
-    | _Preload_  | `rOpenFile: () => ipcRenderer.invoke('mOpenFile')` |
-    | _Main_     | `ipcMain.handle('mOpenFile', () => {...})`         |
-    | _Renderer_ | `...then(data => {...})`                           |
+-   `Renderer => Preload => Main => Preload => Renderer`
+-   RENDERER is asking a question to MAIN and it's expecting an answer back
+-   Setup
+    -   MAIN must register the handler `ipcMain.handle("R2M2R_DialogOpenFile", ...)`
 
--   **Pattern 3: Main to renderer**
+| Step | Process  | Concepts                                              | Sample                                                                   |
+| ---- | -------- | ----------------------------------------------------- | ------------------------------------------------------------------------ |
+| 1    | Renderer | `Await` a function on preload                         | `await window.electronAPI.R2M2R_DialogOpenFile()...`                     |
+| 2    | Preload  | Defines function that calls `invoke()` on ipcRenderer | `R2M2R_DialogOpenFile: () => ipcRenderer.invoke("R2M2R_DialogOpenFile")` |
+| 3    | Main     | Register event handler using `handle` (promise)       | `ipcMain.handle("R2M2R_DialogOpenFile", async () => { ... })`            |
+| 4    | Renderer | Receives response when promise resolves               | `...then(data => { ... })`                                               |
 
-    -   _Main_ => _Preload_ => _Renderer_ => _Preload_ => _Main_
+## Pattern 3: `M2R`: Main to renderer
 
-    | Process    | Code                                                                                                               |
-    | ---------- | ------------------------------------------------------------------------------------------------------------------ |
-    | _Main_     | `mainWindow.webContents.send("mUpdateCounter", 1)`                                                                 |
-    | _Preload_  | `rRegisterCounterHandler: (callback) => ipcRenderer.on("mUpdateCounter", callback)`                                |
-    | _Renderer_ | `window.electronAPI.rRegisterCounterHandler((event, value) => { event.sender.send("mCounterValue", newValue); });` |
-    | _Main_     | `ipcMain.on("mCounterValue", (_event, value) => { ... });`                                                         |
+-   `Main => Preload => Renderer`
+-   MAIN is notifying RENDERER something happen
+-   Setup
+    -   RENDERER must register the handler by calling a function on the preload `window.electronAPI.M2R2M_UpdateCounterHandler( ... );`
+-   Optional: RENDERER sends an aswer back
+    -   Similar to pattern #1 (Renderer to main (one-way)), but bypasses the preload since there is a communication channel opened
+    -   Renderer calls send() function: `event.sender.send("mCounterValue", newValue);`
 
--   **Pattern 4: Renderer to renderer**
-    -   Two options
-        -   Use the main process as a message broker between renderers
-        -   Pass a **MessagePort** from the main process to both renderers, allows direct communication between renderers.
-            -   https://www.electronjs.org/docs/latest/tutorial/message-ports
+| Process  | Concepts                                                 | Sample                                                                                  |
+| -------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Main     | `Send` event                                             | `mainWindow.webContents.send("M2R_UpdateCounter", 1)`                                   |
+| Preload  | Defines function that registers event handler using `on` | `M2R_UpdateCounterHandler: (callback) => ipcRenderer.on("M2R_UpdateCounter", callback)` |
+| Renderer | Register event handler by calling function               | `window.electronAPI.M2R2M_UpdateCounterHandler((event, value) => { ... });`             |
+
+## Pattern 4: Renderer to renderer
+
+-   Two options
+    -   Use the main process as a message broker between renderers
+    -   Pass a **MessagePort** from the main process to both renderers, allows direct communication between renderers.
+        -   https://www.electronjs.org/docs/latest/tutorial/message-ports

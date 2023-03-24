@@ -1,7 +1,8 @@
 export default class MyCode {
 	constructor() {
+		debugger;
 		setTimeout(() => {
-			window.electronAPI.rPing().then((response) => {
+			window.electronAPI.R2M2R_Ping().then((response) => {
 				console.log(response);
 			});
 		}, 100);
@@ -10,14 +11,14 @@ export default class MyCode {
 		this.setTitle();
 		this.openFile();
 		this.counter();
-		this.identify();
+		this.identity();
 	}
 
 	printVersions() {
 		const information = document.getElementById("info");
-		information.innerHTML = `This app is using Chromium (v${electronAPI.versions.chrome}),<br/>
-		                         Node.js (v${electronAPI.versions.node}),<br/>
-		                         and Electron (v${electronAPI.versions.electron})`;
+		information.innerHTML = `This app is using Chromium (v${window.electronAPI.versions.chrome}),<br/>
+		                         Node.js (v${window.electronAPI.versions.node}),<br/>
+		                         and Electron (v${window.electronAPI.versions.electron})`;
 	}
 
 	setTitle() {
@@ -25,7 +26,7 @@ export default class MyCode {
 		const titleInput = document.getElementById("title");
 		setButton.addEventListener("click", () => {
 			const title = titleInput.value;
-			window.electronAPI.rSetTitle(title);
+			window.electronAPI.R2M_SetTitle(title);
 		});
 	}
 
@@ -33,27 +34,27 @@ export default class MyCode {
 		const btn = document.getElementById("btnFile");
 		const filePathElement = document.getElementById("filePath");
 		btn.addEventListener("click", async () => {
-			const filePath = await window.electronAPI.rDialogOpenFile();
+			const filePath = await window.electronAPI.R2M2R_DialogOpenFile();
 			filePathElement.innerText = filePath;
 		});
 	}
 
 	counter() {
 		const counter = document.getElementById("counter");
-		window.electronAPI.rRegisterCounterHandler((event, value) => {
+		window.electronAPI.M2R_UpdateCounter((event, value) => {
 			const oldValue = Number(counter.innerText);
 			const newValue = oldValue + value;
 			counter.innerText = newValue;
-			event.sender.send("mCounterValue", newValue);
+			event.sender.send("R2M_CounterValue", newValue);
 		});
 	}
 
-	identify() {
-		const identify = document.getElementById("Identify");
-		window.electronAPI.rRegisterIdentityHandler((event, value) => {
+	identity() {
+		const identity = document.getElementById("identity");
+		window.electronAPI.M2R_Identity((event, value) => {
 			console.log(value);
-			identify.textContent = value;
-			event.sender.send("evB2E_Identify", value);
+			identity.textContent = value;
+			event.sender.send("M2R_Identity", value);
 		});
 	}
 }

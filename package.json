@@ -1,8 +1,9 @@
 {
 	"name": "my-electron-app",
 	"version": "1.0.0",
+	"type": "module",
 	"description": "Testing Electron (https://www.electronjs.org)",
-	"main": "src/main/main.js",
+	"main": "src/main/main.cjs",
 	"scripts": {
 		"start": "electron-forge start",
 		"package": "electron-forge package",

@@ -7,9 +7,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
 		chrome: process.versions.chrome,
 		electron: process.versions.electron
 	},
-	rPing: () => ipcRenderer.invoke("mPing"),
-	rSetTitle: (title) => ipcRenderer.send("mSetTitle", title),
-	rDialogOpenFile: () => ipcRenderer.invoke("mDialogOpenFile"),
-	rRegisterIdentityHandler: (callback) => ipcRenderer.on("evE2B_identify", callback),
-	rRegisterCounterHandler: (callback) => ipcRenderer.on("mUpdateCounter", callback)
+	R2M2R_Ping: () => ipcRenderer.invoke("R2M2R_Ping"),
+	R2M_SetTitle: (title) => ipcRenderer.send("R2M_SetTitle", title),
+	R2M2R_DialogOpenFile: () => ipcRenderer.invoke("R2M2R_DialogOpenFile"),
+	M2R_UpdateCounter: (callback) => ipcRenderer.on("M2R_UpdateCounter", callback),
+	M2R_Identity: (callback) => ipcRenderer.on("M2R_Identity", callback)
 });
